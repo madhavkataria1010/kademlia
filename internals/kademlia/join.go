@@ -32,7 +32,7 @@ func JoinNetwork(node *models.Node, routingTable *models.RoutingTable, bootstrap
 
 	// Parse the response to get the bootstrap node's ID
 	var response struct {
-		Message string `json:"message"`
+		Message string `json:"message"` // Expected to be "pong"
 		NodeID  string `json:"node_id"`
 	}
 	

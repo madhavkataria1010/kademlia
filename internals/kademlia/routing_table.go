@@ -17,7 +17,7 @@ type NodeDistance struct {
 
 func NewRoutingTable(nodeID string) *models.RoutingTable {
 	// Create a routing table with buckets for each bit of the node ID
-	buckets := make([]*models.Bucket, len(nodeID)*4) // Assuming hex (4 bits per char)
+	buckets := make([]*models.Bucket, len(nodeID)*4) // Assuming hex (4 bits per char) // TODO: Check if this is correct
 
 	k := constants.GetK() // Get the default bucket size (k)
 
@@ -38,6 +38,8 @@ func AddNodeToRoutingTable(rt *models.RoutingTable, target *models.Node, localID
 			return
 		}
 	}
+
+	// TODO: Torrentium, Add a Trust Score. 
 
 	// Add node if bucket is not full
 	if len(bucket.Nodes) < bucket.MaxSize {

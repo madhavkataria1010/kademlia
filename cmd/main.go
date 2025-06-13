@@ -28,6 +28,9 @@ func main() {
 	node := initializeNode(port)
 	routingTable := kademlia.NewRoutingTable(node.ID)
 	storage := kademlia.NewKeyValueStore()
+	
+	// TODO: Case when I want to run a node without joining any network, or bootstrapping the network itself
+	/*here...*/
 
 	// If bootstrap address provided, join the network
 	if bootstrapAddr != "" {

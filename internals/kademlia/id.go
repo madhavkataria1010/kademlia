@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-// TODO: use IP to generate a unique ID
+// TODO: use IP:PORT to generate a unique ID
 func GenerateNodeID() string {
 	rand.Seed(time.Now().UnixNano())
 	randomData := fmt.Sprintf("%d-%d", rand.Int63(), time.Now().UnixNano())

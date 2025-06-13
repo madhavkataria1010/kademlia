@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/Aradhya2708/kademlia/pkg/constants"
 	"github.com/Aradhya2708/kademlia/pkg/models"
 )
 
@@ -17,8 +18,11 @@ type NodeDistance struct {
 func NewRoutingTable(nodeID string) *models.RoutingTable {
 	// Create a routing table with buckets for each bit of the node ID
 	buckets := make([]*models.Bucket, len(nodeID)*4) // Assuming hex (4 bits per char)
+
+	k := constants.GetK() // Get the default bucket size (k)
+
 	for i := range buckets {
-		buckets[i] = &models.Bucket{MaxSize: 20} // Default bucket size (k)
+		buckets[i] = &models.Bucket{MaxSize: k} // Default bucket size (k)
 	}
 	return &models.RoutingTable{Buckets: buckets}
 }
@@ -66,7 +70,7 @@ func FindClosestNodes(routingTable *models.RoutingTable, queryID, localID string
 	})
 
 	// Return up to k closest nodes.
-	k := const.GetK()
+	k := constants.GetK()
 
 	closestNodes := make([]*models.Node, 0, k)
 	for i := 0; i < len(distances) && i < k; i++ {

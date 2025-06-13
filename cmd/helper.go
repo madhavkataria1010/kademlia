@@ -32,10 +32,10 @@ func startServer(node *models.Node, routingTable *models.RoutingTable, storage *
 		kademlia.FindNodeHandler(w, r, node, routingTable)
 	})
 	http.HandleFunc("/store", func(w http.ResponseWriter, r *http.Request) {
-		kademlia.StoreHandler(w, r, storage)
+		kademlia.StoreHandler(w, r, node, storage, routingTable)
 	})
 	http.HandleFunc("/find_value", func(w http.ResponseWriter, r *http.Request) {
-		kademlia.FindValueHandler(w, r, storage)
+		kademlia.FindValueHandler(w, r, node, storage, routingTable)
 	})
 
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), nil))

@@ -38,7 +38,7 @@ func FindNodeHandler(w http.ResponseWriter, r *http.Request, node *models.Node, 
 }
 
 // StoreHandler handles /store requests
-func StoreHandler(w http.ResponseWriter, r *http.Request, storage *models.KeyValueStore) {
+func StoreHandler(w http.ResponseWriter, r *http.Request, node *models.Node, storage *models.KeyValueStore, routingTable *models.RoutingTable) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 		return
@@ -73,7 +73,7 @@ func StoreHandler(w http.ResponseWriter, r *http.Request, storage *models.KeyVal
 }
 
 // FindValueHandler handles /find_value requests
-func FindValueHandler(w http.ResponseWriter, r *http.Request, storage *models.KeyValueStore) {
+func FindValueHandler(w http.ResponseWriter, r *http.Request, node *models.Node, storage *models.KeyValueStore, routingTable *models.RoutingTable) {
 	queryKey := r.URL.Query().Get("key")
 	if queryKey == "" {
 		http.Error(w, "Missing 'key' parameter", http.StatusBadRequest)
@@ -87,6 +87,11 @@ func FindValueHandler(w http.ResponseWriter, r *http.Request, storage *models.Ke
 		json.NewEncoder(w).Encode(value)
 	} else {
 		// Key not found, respond with a 404
-		http.Error(w, fmt.Sprintf("Key '%s' not found", queryKey), http.StatusNotFound)
+		// http.Error(w, fmt.Sprintf("Key '%s' not found", queryKey), http.StatusNotFound)
+
+		// key not found, respond as FIND_NODE res
+		closestNodes := FindClosestNodes(routingTable, queryKey, node.ID)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(closestNodes)
 	}
 }

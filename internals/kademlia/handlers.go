@@ -11,19 +11,43 @@ import (
 )
 
 // PingHandler handles /ping requests
-func PingHandler(w http.ResponseWriter, r *http.Request, node *models.Node, routingTable *models.RoutingTable) {
+func PingHandler(w http.ResponseWriter, r *http.Request, node *models.Node, storage *models.KeyValueStore, routingTable *models.RoutingTable) {
+	fmt.Println("Received ping request from:", r.RemoteAddr)
+
+	// Debug: Print Node Details
+	fmt.Println("Current Node Details:")
+	fmt.Printf("ID: %s, IP: %s, Port: %d\n", node.ID, node.IP, node.Port)
+
+	// Debug: Print Routing Table Details
+	fmt.Println("Routing Table Details:")
+	for i, bucket := range routingTable.Buckets {
+		fmt.Printf("Bucket %d: ", i)
+		for _, n := range bucket.Nodes {
+			fmt.Printf("NodeID: %s, IP: %s, Port: %d | ", n.ID, n.IP, n.Port)
+		}
+		fmt.Println()
+	}
+
+	// Debug: Print Key-Value Store Details
+	fmt.Println("Key-Value Store Contents:")
+	for key, value := range storage.GetAll() {
+		fmt.Printf("Key: %s, Value: %s\n", key, value)
+	}
+
+	// Response
 	response := map[string]string{
 		"message": "pong",
 		"node_id": node.ID,
 	}
 
-	// Respond with a JSON object
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
 
 // FindNodeHandler handles /find_node requests
 func FindNodeHandler(w http.ResponseWriter, r *http.Request, node *models.Node, routingTable *models.RoutingTable) {
+	fmt.Println("Received ping find node req from:", r.RemoteAddr)
+
 	queryID := r.URL.Query().Get("id")
 
 	err := validators.ValidateID(queryID, validators.HexadecimalValidator)
@@ -97,6 +121,7 @@ func StoreHandler(w http.ResponseWriter, r *http.Request, node *models.Node, sto
 
 	// If not among the closest, respond with the k closest nodes
 	if !isClosest {
+		fmt.Println("Node is not among the closest nodes, returning closest nodes")
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(closestNodes)
 		return
@@ -104,6 +129,7 @@ func StoreHandler(w http.ResponseWriter, r *http.Request, node *models.Node, sto
 
 	// Store the key-value pair if the node is among the closest
 	storage.Set(kv.Key, kv.Value)
+	fmt.Println("Stored key-value pair:", kv.Key, kv.Value)
 
 	// Respond with success
 	w.WriteHeader(http.StatusCreated)

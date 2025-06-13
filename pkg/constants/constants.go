@@ -4,7 +4,7 @@ import "sync"
 
 var (
 	// Default values for Kademlia
-	kValue = 20 // Bucket size, can be updated dynamically
+	kValue = 1 // Bucket size, can be updated dynamically
 
 	// Mutex for thread-safe access
 	mu sync.RWMutex

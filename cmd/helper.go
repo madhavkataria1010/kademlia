@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"fmt"
@@ -9,7 +9,9 @@ import (
 	"github.com/Aradhya2708/kademlia/pkg/models"
 )
 
-func initializeNode(port int) *models.Node {
+func InitializeNode(port int) *models.Node {
+
+	fmt.Println("Initializing Kademlia node...")
 	// Generate Node ID
 	nodeID := kademlia.GenerateNodeID()
 
@@ -24,9 +26,9 @@ func initializeNode(port int) *models.Node {
 	return node
 }
 
-func startServer(node *models.Node, routingTable *models.RoutingTable, storage *models.KeyValueStore, port int) {
+func StartServer(node *models.Node, routingTable *models.RoutingTable, storage *models.KeyValueStore, port int) {
 	http.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
-		kademlia.PingHandler(w, r, node, routingTable)
+		kademlia.PingHandler(w, r, node, storage, routingTable)
 	})
 	http.HandleFunc("/find_node", func(w http.ResponseWriter, r *http.Request) {
 		kademlia.FindNodeHandler(w, r, node, routingTable)

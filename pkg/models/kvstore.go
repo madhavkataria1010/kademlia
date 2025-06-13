@@ -29,3 +29,15 @@ func (kv *KeyValueStore) Get(key string) (string, bool) {
 	value, exists := kv.Store[key]
 	return value, exists
 }
+
+func (kv *KeyValueStore) GetAll() map[string]string {
+	kv.mu.RLock()
+	defer kv.mu.RUnlock()
+
+	// Create a copy to ensure thread safety
+	copy := make(map[string]string, len(kv.Store))
+	for key, value := range kv.Store {
+		copy[key] = value
+	}
+	return copy
+}

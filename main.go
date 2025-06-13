@@ -1,14 +1,17 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strconv"
 
+	"github.com/Aradhya2708/kademlia/cmd"
 	"github.com/Aradhya2708/kademlia/internals/kademlia"
 )
 
 func main() {
+
 	// Parse CLI arguments for node configuration
 	if len(os.Args) < 2 {
 		log.Fatal("Usage: go run main.go <port> [<bootstrap_ip:bootstrap_port>] ")
@@ -24,8 +27,10 @@ func main() {
 		bootstrapAddr = os.Args[2]
 	}
 
+	fmt.Println("Welcome to Kademlia Distributed Hash Table (DHT) Node!")
+
 	// Initialize node, routing table, and storage
-	node := initializeNode(port)
+	node := cmd.InitializeNode(port)
 	routingTable := kademlia.NewRoutingTable(node.ID)
 	storage := kademlia.NewKeyValueStore()
 
@@ -45,5 +50,5 @@ func main() {
 
 	// Start the server for Kademlia RPCs
 	log.Printf("Starting Kademlia node on port %d...\n", port)
-	startServer(node, routingTable, storage, port)
+	cmd.StartServer(node, routingTable, storage, port)
 }

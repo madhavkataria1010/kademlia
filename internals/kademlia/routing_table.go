@@ -66,7 +66,8 @@ func FindClosestNodes(routingTable *models.RoutingTable, queryID, localID string
 	})
 
 	// Return up to k closest nodes.
-	k := 20 // Kademlia bucket size
+	k := const.GetK()
+
 	closestNodes := make([]*models.Node, 0, k)
 	for i := 0; i < len(distances) && i < k; i++ {
 		closestNodes = append(closestNodes, distances[i].Node)

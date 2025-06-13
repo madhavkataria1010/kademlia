@@ -64,7 +64,29 @@ func StoreHandler(w http.ResponseWriter, r *http.Request, node *models.Node, sto
 		return
 	}
 
-	// Store the key-value pair using the thread-safe method
+	// Find the k closest nodes to the key
+	closestNodes := FindClosestNodes(routingTable, kv.Key, node.ID)
+
+	// // Calculate the XOR distance of this node to the key
+	// ownDistance := calculateXORDistance(node.ID, kv.Key) ? why
+
+	// Check if this node is among the k closest
+	isClosest := false
+	for _, peer := range closestNodes {
+		if peer.ID == node.ID {
+			isClosest = true
+			break
+		}
+	}
+
+	// If not among the closest, respond with the k closest nodes
+	if !isClosest {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(closestNodes)
+		return
+	}
+
+	// Store the key-value pair if the node is among the closest
 	storage.Set(kv.Key, kv.Value)
 
 	// Respond with success

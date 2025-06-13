@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	validators "github.com/Aradhya2708/kademlia/internals/validator"
 	"github.com/Aradhya2708/kademlia/pkg/models"
 )
 
@@ -24,6 +25,14 @@ func PingHandler(w http.ResponseWriter, r *http.Request, node *models.Node, rout
 // FindNodeHandler handles /find_node requests
 func FindNodeHandler(w http.ResponseWriter, r *http.Request, node *models.Node, routingTable *models.RoutingTable) {
 	queryID := r.URL.Query().Get("id")
+
+	err := validators.ValidateID(queryID, validators.HexadecimalValidator)
+
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Invalid ID format: %v", err), http.StatusBadRequest)
+		return
+	}
+
 	if queryID == "" {
 		http.Error(w, "Missing 'id' parameter", http.StatusBadRequest)
 		return
@@ -64,6 +73,13 @@ func StoreHandler(w http.ResponseWriter, r *http.Request, node *models.Node, sto
 		return
 	}
 
+	err = validators.ValidateID(kv.Key, validators.HexadecimalValidator)
+
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Invalid Key format: %v", err), http.StatusBadRequest)
+		return
+	}
+
 	// Find the k closest nodes to the key
 	closestNodes := FindClosestNodes(routingTable, kv.Key, node.ID)
 
@@ -99,6 +115,13 @@ func FindValueHandler(w http.ResponseWriter, r *http.Request, node *models.Node,
 	queryKey := r.URL.Query().Get("key")
 	if queryKey == "" {
 		http.Error(w, "Missing 'key' parameter", http.StatusBadRequest)
+		return
+	}
+
+	err := validators.ValidateID(queryKey, validators.HexadecimalValidator)
+
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Invalid Key format: %v", err), http.StatusBadRequest)
 		return
 	}
 

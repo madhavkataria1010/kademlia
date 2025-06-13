@@ -28,16 +28,19 @@ func main() {
 	node := initializeNode(port)
 	routingTable := kademlia.NewRoutingTable(node.ID)
 	storage := kademlia.NewKeyValueStore()
-	
-	// TODO: Case when I want to run a node without joining any network, or bootstrapping the network itself
-	/*here...*/
 
-	// If bootstrap address provided, join the network
-	if bootstrapAddr != "" {
+	if bootstrapAddr == "" {
+		log.Println("No bootstrap address provided. Running in standalone mode.")
+		log.Printf("Node ID: %s, Port: %d\n", node.ID, port)
+		log.Println("This node is the starting point of a new network.")
+	} else {
+		// If bootstrap address provided, join the network
+		log.Printf("Attempting to join the network via bootstrap node: %s\n", bootstrapAddr)
 		err := kademlia.JoinNetwork(node, routingTable, bootstrapAddr)
 		if err != nil {
 			log.Fatalf("Failed to join network: %v", err)
 		}
+		log.Println("Successfully joined the network.")
 	}
 
 	// Start the server for Kademlia RPCs

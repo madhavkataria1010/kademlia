@@ -2,10 +2,17 @@ package kademlia
 
 import (
 	"math/big"
+	"sort"
 	"strings"
 
 	"github.com/Aradhya2708/kademlia/pkg/models"
 )
+
+// NodeDistance represents a node along with its calculated distance.
+type NodeDistance struct {
+	Node     *models.Node
+	Distance *big.Int
+}
 
 func NewRoutingTable(nodeID string) *models.RoutingTable {
 	// Create a routing table with buckets for each bit of the node ID
@@ -36,6 +43,36 @@ func AddNodeToRoutingTable(rt *models.RoutingTable, target *models.Node, localID
 		bucket.Nodes = bucket.Nodes[1:] // Simplified eviction (FIFO)
 		bucket.Nodes = append(bucket.Nodes, target)
 	}
+}
+
+// FindClosestNodes retrieves the closest nodes to the given queryID.
+func FindClosestNodes(routingTable *models.RoutingTable, queryID, localID string) []*models.Node {
+	// Calculate the XOR distance and collect all nodes.
+	var distances []NodeDistance
+
+	for _, bucket := range routingTable.Buckets {
+		for _, node := range bucket.Nodes {
+			distance := calculateXORDistance(queryID, node.ID)
+			distances = append(distances, NodeDistance{
+				Node:     node,
+				Distance: distance,
+			})
+		}
+	}
+
+	// Sort nodes by distance.
+	sort.Slice(distances, func(i, j int) bool {
+		return distances[i].Distance.Cmp(distances[j].Distance) < 0
+	})
+
+	// Return up to k closest nodes.
+	k := 20 // Kademlia bucket size
+	closestNodes := make([]*models.Node, 0, k)
+	for i := 0; i < len(distances) && i < k; i++ {
+		closestNodes = append(closestNodes, distances[i].Node)
+	}
+
+	return closestNodes
 }
 
 func calculateXORDistance(id1, id2 string) *big.Int {

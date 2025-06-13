@@ -1,0 +1,24 @@
+
+CMD must include these commands:
+
+Kademlia RPCs
+- `ping` - Ping a node to check if it is reachable. 
+returns pong
+- `find_node` <key> - Find a node in the network by its ID. 
+returns (IP address, UDP port, Node ID) tuple for each of the k nodes closest to the target id.
+- `find_value <key>` - Find a value in the network by its key. 
+returns the value if found, or an error if not found.
+- `store <key> <val>` - Store a value in the network. returns returns ack
+- `bootstrap <[]nodes>` - Bootstrap the node with a list of known nodes.
+
+**these are single apis. Kad Node never CALLS them, only responds to them.???? bro has to do bootstrap himself tho innit?
+
+A computer can be asked FIND_NODE(id) call and will return k of the closest computer ids in its routing table and their IP addresses.
+
+A computer can receive a FIND_VALUE(key) call and will return the value if the (key,value) pair is stored locally on the machine. If the key is not stored locally, the computer will respond as if it received a FIND_COMP(key) call.
+
+A computer can receive a STORE(key, value) and will just store the key-value pair in a local map of its choice.
+
+A computer can receive a PING call to verify that the computer is still online.
+
+To ensure that keys remain in the network, the caller who stored or requested a resource is required to re-issue a STORE call within a given time frame, such as every 24 hours. Otherwise, computers will automatically evict old key-value pairs to reduce bloat.

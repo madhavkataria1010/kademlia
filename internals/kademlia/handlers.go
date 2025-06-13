@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
+	"strconv"
 
 	validators "github.com/Aradhya2708/kademlia/internals/validator"
 	"github.com/Aradhya2708/kademlia/pkg/models"
@@ -14,11 +16,40 @@ import (
 func PingHandler(w http.ResponseWriter, r *http.Request, node *models.Node, storage *models.KeyValueStore, routingTable *models.RoutingTable) {
 	fmt.Println("Received ping request from:", r.RemoteAddr)
 
-	// Debug: Print Node Details
+	// Extract pinger details from query parameters
+	pingerID := r.URL.Query().Get("id")
+	pingerPort := r.URL.Query().Get("port")
+
+	if pingerID != "" && pingerPort != "" {
+		// Pinger is a node, attempt to parse the port
+		pingerUDPPort, err := strconv.Atoi(pingerPort)
+		if err != nil || pingerUDPPort <= 0 || pingerUDPPort > 65535 {
+			http.Error(w, "Invalid UDP port provided", http.StatusBadRequest)
+			return
+		}
+
+		// Extract the IP address from the RemoteAddr
+		pingerIP, _, err := net.SplitHostPort(r.RemoteAddr)
+		if err != nil {
+			http.Error(w, "Failed to extract IP address", http.StatusInternalServerError)
+			return
+		}
+
+		// Add the pinger node to the routing table
+		pingerNode := &models.Node{
+			ID:   pingerID,
+			IP:   pingerIP,
+			Port: pingerUDPPort,
+		}
+		AddNodeToRoutingTable(routingTable, pingerNode, node.ID)
+		fmt.Printf("Added node to routing table: ID: %s, IP: %s, Port: %d\n", pingerID, pingerIP, pingerUDPPort)
+	}
+
+	// Debug: Print Current Node Details
 	fmt.Println("Current Node Details:")
 	fmt.Printf("ID: %s, IP: %s, Port: %d\n", node.ID, node.IP, node.Port)
 
-	// Debug: Print Routing Table Details
+	// Debug: Print Routing Table
 	fmt.Println("Routing Table Details:")
 	for i, bucket := range routingTable.Buckets {
 		fmt.Printf("Bucket %d: ", i)
@@ -28,18 +59,17 @@ func PingHandler(w http.ResponseWriter, r *http.Request, node *models.Node, stor
 		fmt.Println()
 	}
 
-	// Debug: Print Key-Value Store Details
+	// Debug: Print Key-Value Store
 	fmt.Println("Key-Value Store Contents:")
 	for key, value := range storage.GetAll() {
 		fmt.Printf("Key: %s, Value: %s\n", key, value)
 	}
 
-	// Response
-	response := map[string]string{
+	// Respond to the pinger
+	response := map[string]interface{}{
 		"message": "pong",
 		"node_id": node.ID,
 	}
-
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }

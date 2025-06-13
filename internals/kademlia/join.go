@@ -22,8 +22,10 @@ func JoinNetwork(node *models.Node, routingTable *models.RoutingTable, bootstrap
 		return fmt.Errorf("invalid port in bootstrap address: %v", err)
 	}
 
-	// Send a ping request to the bootstrap node
-	url := fmt.Sprintf("http://%s/ping", bootstrapAddr)
+	// Construct the ping request URL with query parameters
+	url := fmt.Sprintf("http://%s/ping?id=%s&port=%d", bootstrapAddr, node.ID, node.Port)
+
+	// Send a GET request to the bootstrap node
 	resp, err := http.Get(url)
 	if err != nil || resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("failed to join network: %v", err)
@@ -35,7 +37,6 @@ func JoinNetwork(node *models.Node, routingTable *models.RoutingTable, bootstrap
 		Message string `json:"message"` // Expected to be "pong"
 		NodeID  string `json:"node_id"`
 	}
-	
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
 		return fmt.Errorf("failed to decode response from bootstrap node: %v", err)
 	}
@@ -52,6 +53,7 @@ func JoinNetwork(node *models.Node, routingTable *models.RoutingTable, bootstrap
 		Port: port,
 	}
 	AddNodeToRoutingTable(routingTable, bootstrapNode, node.ID)
+	fmt.Printf("Successfully joined network via bootstrap node: ID=%s, IP=%s, Port=%d\n", response.NodeID, ip, port)
 
 	return nil
 }

@@ -39,7 +39,7 @@ func AddNodeToRoutingTable(rt *models.RoutingTable, target *models.Node, localID
 		}
 	}
 
-	// TODO: Torrentium, Add a Trust Score. 
+	// TODO: Torrentium, Add a Trust Score.
 
 	// Add node if bucket is not full
 	if len(bucket.Nodes) < bucket.MaxSize {
@@ -90,7 +90,10 @@ func calculateXORDistance(id1, id2 string) *big.Int {
 }
 
 func getBucketIndex(distance *big.Int) int {
-	return distance.BitLen() - 1 // Most significant bit position
+	if distance.Sign() == 0 { // Special case for distance 0
+		return 0
+	}
+	return distance.BitLen() - 1
 }
 
 func decodeHex(s string) []byte {

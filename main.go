@@ -8,6 +8,7 @@ import (
 
 	"github.com/Aradhya2708/kademlia/cmd"
 	"github.com/Aradhya2708/kademlia/internals/kademlia"
+	"github.com/Aradhya2708/kademlia/pkg/models"
 )
 
 func main() {
@@ -33,6 +34,18 @@ func main() {
 	node := cmd.InitializeNode(port)
 	routingTable := kademlia.NewRoutingTable(node.ID)
 	storage := kademlia.NewKeyValueStore()
+
+	fmt.Printf("hi")
+
+	// Add the current node to its own routing table
+	selfNode := &models.Node{
+		ID:   node.ID,
+		IP:   "127.0.0.1", // Use local IP as the node's IP address
+		Port: port,
+	}
+	kademlia.AddNodeToRoutingTable(routingTable, selfNode, node.ID)
+
+	log.Printf("Node initialized: ID=%s, IP=%s, Port=%d\n", node.ID, "127.0.0.1", port)
 
 	if bootstrapAddr == "" {
 		log.Println("No bootstrap address provided. Running in standalone mode.")

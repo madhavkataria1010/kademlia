@@ -33,6 +33,7 @@ func AddNodeToRoutingTable(rt *models.RoutingTable, target *models.Node, localID
 	bucket := rt.Buckets[bucketIndex]
 
 	// Ensure no duplicate entries
+	//TODO: Can Make this more efficient by using a HashMap or Set.
 	for _, n := range bucket.Nodes {
 		if n.ID == target.ID {
 			return
@@ -45,12 +46,14 @@ func AddNodeToRoutingTable(rt *models.RoutingTable, target *models.Node, localID
 	if len(bucket.Nodes) < bucket.MaxSize {
 		bucket.Nodes = append(bucket.Nodes, target)
 	} else {
-		// Handle full bucket (eviction or ignore)
+		//TODO: Handle full bucket correctly, if the least recently used node is alive then ignore the new node, else evict it.
+
 		bucket.Nodes = bucket.Nodes[1:] // Simplified eviction (FIFO)
 		bucket.Nodes = append(bucket.Nodes, target)
 	}
 }
 
+// TODO: Make the rounting table global instead of passing it in each function.
 // FindClosestNodes retrieves the closest nodes to the given queryID.
 func FindClosestNodes(routingTable *models.RoutingTable, queryID, localID string) []*models.Node {
 	// Calculate the XOR distance and collect all nodes.
@@ -97,6 +100,10 @@ func getBucketIndex(distance *big.Int) int {
 }
 
 func decodeHex(s string) []byte {
-	result, _ := new(big.Int).SetString(strings.ToUpper(s), 16)
+	result, ok := new(big.Int).SetString(strings.ToUpper(s), 16)
+	if !ok || result == nil {
+		// Return empty byte slice for invalid hex strings
+		return []byte{}
+	}
 	return result.Bytes()
 }

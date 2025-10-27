@@ -347,9 +347,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- **Kademlia Protocol**: Based on the original paper by Petar Maymounkov and David Mazières
-- **Go Community**: For excellent libraries and development tools
-- **Contributors**: Thanks to all who have contributed to this project
+- **Kademlia Protocol**: Based on the original paper by Petar Maymounkov and David Mazières.
+- **Go Community**: For excellent libraries and development tools.
+- **Contributors**: Thanks to all who have contributed to this project.
 
 ## 📞 Support
 
